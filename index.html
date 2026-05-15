@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nutrition Vélo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'IBM Plex Sans',sans-serif;background:#f5f4f0;color:#484848;min-height:100vh}
+
+:root{
+  --jaune:#EAE666;--vert:#8CBF43;--bleu:#1A8FBF;--marron:#754435;
+  --beige:#C59B6C;--gris:#484848;--rouge:#AC4845;--orange:#D4793A;
+  --bg:#f5f4f0;--surface:#fff;--border:#e0ddd8;--text:#484848;--text-light:#8a8480;
+  --radius:8px;--shadow:0 1px 4px rgba(0,0,0,0.07),0 0 0 1px rgba(0,0,0,0.04)
+}
+
+/* Layout */
+.app-header{background:var(--marron);color:#fff;padding:11px 24px;display:flex;align-items:center;gap:12px}
+.app-header h1{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.app-header span{font-size:11px;opacity:.55;font-family:'IBM Plex Mono',monospace}
+
+.tabs-bar{background:#fff;border-bottom:2px solid var(--border);display:flex;padding:0 20px;gap:0}
+.tab-btn{padding:11px 18px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:var(--text-light);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--gris)}
+.tab-btn.active{color:var(--marron);border-bottom-color:var(--marron)}
+
+.tab-content{display:none;padding:18px 20px}
+.tab-content.active{display:block}
+
+.two-col{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+@media(max-width:860px){.two-col{grid-template-columns:1fr}}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.card-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-light);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+
+/* Forms */
+.form-group{margin-bottom:10px}
+.form-group:last-child{margin-bottom:0}
+.form-group label{display:block;font-size:11.5px;font-weight:500;color:var(--text-light);margin-bottom:3px}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1;min-width:0}
+
+input[type=number],input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--border);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);background:#fff;transition:border-color .15s}
+input[type=number]:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--bleu);box-shadow:0 0 0 3px rgba(26,143,191,.12)}
+input[type=range]{width:100%;accent-color:var(--marron);cursor:pointer}
+
+.slider-group{display:flex;align-items:center;gap:8px}
+.slider-group input[type=range]{flex:1}
+.slider-val{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;min-width:48px;text-align:right;color:var(--marron)}
+
+/* Buttons */
+.btn{padding:7px 13px;border-radius:5px;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#157aa8}
+.btn-success{background:var(--vert);color:#fff}.btn-success:hover{background:#7aab38}
+.btn-danger{background:var(--rouge);color:#fff}.btn-danger:hover{background:#963d3a}
+.btn-secondary{background:var(--bg);color:var(--gris);border:1px solid var(--border)}.btn-secondary:hover{background:#e8e5e0}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--bg)}
+.btn-sm{padding:4px 9px;font-size:11.5px}
+.btn-xs{padding:2px 6px;font-size:11px}
+.btn-full{width:100%;justify-content:center}
+
+/* Alerts */
+.alert{padding:9px 13px;border-radius:6px;font-size:12.5px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.alert-warning{background:#fff6e5;color:#7a4f00;border-left:3px solid var(--orange)}
+.alert-danger{background:#fde8e8;color:#7b2020;border-left:3px solid var(--rouge)}
+.alert-success{background:#edf7e6;color:#3a5c1a;border-left:3px solid var(--vert)}
+.alert-info{background:#e8f4fb;color:#1a4f6e;border-left:3px solid var(--bleu)}
+.alert .alert-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* Metrics */
+.metrics-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.metric{padding:9px 12px;border-radius:6px;background:var(--bg);flex:1;min-width:90px}
+.metric.highlight{border:1.5px solid var(--bleu)}
+.metric-label{font-size:10.5px;color:var(--text-light);margin-bottom:2px;line-height:1.3}
+.metric-value{font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1.2}
+.metric-unit{font-size:10.5px;color:var(--text-light);font-weight:400}
+
+/* Cart */
+.cart-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.cart-item:last-child{border-bottom:none}
+.cart-name{flex:1;min-width:0}
+.cart-name strong{display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-name small{font-size:11px;color:var(--text-light)}
+.cart-qty{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cart-qty input[type=range]{width:72px}
+.cart-qty input[type=number]{width:52px;padding:4px 6px;font-size:12px}
+.cart-qty span{font-size:11px;color:var(--text-light);min-width:16px}
+.cart-macros{font-family:'IBM Plex Mono',monospace;font-size:11px;text-align:right;flex-shrink:0;color:var(--text-light);min-width:90px;line-height:1.7}
+.cart-macros .cho{color:var(--marron);font-weight:500}
+
+/* Ratio gauge */
+.ratio-wrapper{margin:4px 0 14px}
+.ratio-label{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--marron);margin-bottom:3px}
+.ratio-status-line{text-align:center;margin-bottom:10px}
+.ratio-bar-wrap{position:relative;height:18px;border-radius:9px;overflow:visible;margin-bottom:18px}
+.ratio-bar{height:18px;border-radius:9px;background:linear-gradient(to right,#AC4845 0%,#D4793A 23%,#EAE666 38%,#8CBF43 50%,#8CBF43 74%,#EAE666 84%,#D4793A 92%,#AC4845 100%)}
+.ratio-marker{position:absolute;top:-5px;transform:translateX(-50%);width:10px;height:28px;background:var(--marron);border-radius:3px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.28);transition:left .35s cubic-bezier(.4,0,.2,1);z-index:10}
+.ratio-ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-top:-14px;padding:0 0}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500}
+.tag-green{background:#edf7e6;color:#3a6019}
+.tag-blue{background:#e4f3fb;color:#1a4f70}
+.tag-orange{background:#fff0de;color:#7a4500}
+.tag-red{background:#fde8e8;color:#7b2020}
+.tag-yellow{background:#fdfde0;color:#6b6500}
+.tag-gray{background:var(--bg);color:var(--text-light)}
+
+/* Bottles */
+.bottle-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;min-height:24px}
+.bottle-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:#e4f3fb;color:var(--bleu);font-size:12px;font-weight:500;cursor:pointer;border:1px solid #b5dff5;transition:background .15s}
+.bottle-chip:hover{background:#c9e8f7}
+.bottle-chip .x{font-size:13px;line-height:1;opacity:.7}
+.bottle-add-row{display:flex;gap:5px;flex-wrap:wrap}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;padding:7px 9px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-light);border-bottom:2px solid var(--border);background:var(--bg);white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#faf9f6}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* Section title */
+.section-sep{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-light);padding:9px 0 6px;margin-top:12px;border-bottom:1px solid var(--border);margin-bottom:9px}
+.section-sep:first-child{margin-top:0}
+
+/* Checkbox */
+.chk-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;line-height:1.4}
+.chk-label input[type=checkbox]{width:15px;height:15px;accent-color:var(--marron);cursor:pointer;flex-shrink:0}
+
+/* Electrolyte reco */
+.elec-reco{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.elec-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:11px;text-align:center}
+.elec-card-label{font-size:10.5px;color:var(--text-light);margin-bottom:3px}
+.elec-card-val{font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--marron)}
+.elec-card-unit{font-size:10.5px;color:var(--text-light)}
+
+/* Gel recipe */
+.recipe-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.recipe-table td{padding:3px 8px 3px 0;font-size:12.5px}
+.recipe-table td:first-child{color:var(--text-light)}
+.recipe-table td:last-child{font-family:'IBM Plex Mono',monospace;font-weight:500}
+.recipe-table tr.total td{border-top:1px solid var(--border);padding-top:7px;font-weight:600}
+
+/* Utilities */
+.muted{color:var(--text-light)}
+.bold{font-weight:600}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.flex{display:flex}
+.flex-gap{gap:8px}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.w-full{width:100%}
+hr.div{border:none;border-top:1px solid var(--border);margin:12px 0}
+.scroll-x{overflow-x:auto}
+.empty-state{padding:16px 0;text-align:center;color:var(--text-light);font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Nutrition Vélo</h1>
+  <span>CHO Planner v1.0</span>
+</header>
+
+<nav class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('plan')" id="tab-plan">Plan de sortie</button>
+  <button class="tab-btn" onclick="switchTab('elec')" id="tab-elec">Électrolytes</button>
+  <button class="tab-btn" onclick="switchTab('gel')" id="tab-gel">Gel maison</button>
+  <button class="tab-btn" onclick="switchTab('products')" id="tab-products">Base produits</button>
+</nav>
+
+<!-- ===== TAB: PLAN ===== -->
+<div class="tab-content active" id="content-plan">
+  <div class="two-col">
+    <div>
+
+      <!-- Paramètres -->
+      <div class="card">
+        <div class="card-title">Paramètres de sortie</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Durée — heures</label>
+            <input type="number" id="dur-h" value="5" min="0" max="24" step="1" oninput="updateSynthesis()">
+          </div>
+          <div class="form-group">
+            <label>Durée — minutes</label>
+            <input type="number" id="dur-m" value="0" min="0" max="59" step="5" oninput="updateSynthesis()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Objectif CHO (g/h)</label>
+            <input type="number" id="cho-per-h" value="110" min="0" step="5" oninput="updateSynthesis()">
+          </div>
+          <div class="form-group">
+            <label>Objectif glucose (g/h)</label>
+            <input type="number" id="glu-per-h" value="73" min="0" step="1" oninput="updateSynthesis()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Ajouter au panier -->
+      <div class="card">
+        <div class="card-title">Ajouter au panier</div>
+        <div class="form-group">
+          <label>Produit</label>
+          <select id="sel-product" onchange="onProductSelect()"></select>
+        </div>
+        <div id="qty-ctrl"></div>
+        <button class="btn btn-primary btn-full" onclick="addToCart()">Ajouter au panier</button>
+      </div>
+
+      <!-- Panier -->
+      <div class="card">
+        <div class="card-title">
+          Panier
+          <button class="btn btn-xs btn-secondary" onclick="clearCart()">Vider</button>
+        </div>
+        <div id="cart-list"><div class="empty-state">Panier vide</div></div>
+      </div>
+
+      <!-- Bidons -->
+      <div class="card">
+        <div class="card-title">Bidons d'eau</div>
+        <div class="form-group">
+          <label>Ajouter un bidon</label>
+          <div class="bottle-add-row">
+            <button class="btn btn-sm btn-outline" onclick="addBottle(500)">+ 500 ml</button>
+            <button class="btn btn-sm btn-outline" onclick="addBottle(650)">+ 650 ml</button>
+            <button class="btn btn-sm btn-outline" onclick="addBottle(850)">+ 850 ml</button>
+            <button class="btn btn-sm btn-outline" onclick="addBottle(950)">+ 950 ml</button>
+          </div>
+          <div class="bottle-chips" id="bottles-list"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Synthèse -->
+    <div id="synthesis"></div>
+  </div>
+</div>
+
+<!-- ===== TAB: ÉLECTROLYTES ===== -->
+<div class="tab-content" id="content-elec">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title">Paramètres conditions</div>
+        <div class="form-group">
+          <label>Température ambiante</label>
+          <div class="slider-group">
+            <input type="range" id="elec-temp" min="5" max="45" value="18" step="1" oninput="updateElec()">
+            <span class="slider-val" id="elec-temp-val">18 °C</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="chk-label">
+            <input type="checkbox" id="elec-heat" onchange="updateElec()">
+            Entraînement chaleur (heat training)
+          </label>
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+          <label>Taux de sudation personnel</label>
+          <div class="slider-group">
+            <input type="range" id="elec-sweat" min="1" max="5" value="2" step="1" oninput="updateElec()">
+            <span class="slider-val" id="elec-sweat-val">2 / 5</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-light);margin-top:2px;" id="elec-sweat-desc">Sudation modérée</div>
+        </div>
+        <hr class="div">
+        <div style="font-size:11.5px;color:var(--text-light);">
+          Durée de sortie : <span id="elec-dur-display" style="font-family:'IBM Plex Mono',monospace;color:var(--gris);">—</span><br>
+          (renseignée dans l'onglet Plan)
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Produit électrolyte</div>
+        <div style="font-size:12.5px;line-height:1.9;color:var(--text-light);">
+          1 serving = 2 g<br>
+          Na : <strong style="color:var(--gris);">517 mg</strong> &nbsp;
+          K : <strong style="color:var(--gris);">153 mg</strong><br>
+          Ca : <strong style="color:var(--gris);">92 mg</strong> &nbsp;
+          Mg : <strong style="color:var(--gris);">15 mg</strong>
+        </div>
+      </div>
+    </div>
+    <div id="elec-reco"></div>
+  </div>
+</div>
+
+<!-- ===== TAB: GEL MAISON ===== -->
+<div class="tab-content" id="content-gel">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title">Paramètres gel maison</div>
+        <p style="font-size:12px;color:var(--text-light);margin-bottom:12px;line-height:1.6;">Le gel complète le CHO/h manquant par rapport au panier, en visant l'objectif glucose. Recette chargée avec facteur ×1.11 (compensation perte 10 %).</p>
+        <div class="form-group">
+          <label>Sirop (depuis le catalogue)</label>
+          <select id="gel-syrup" onchange="updateGel()"></select>
+        </div>
+        <div class="form-group">
+          <label>Quantité de sirop consommée (g)</label>
+          <div class="slider-group">
+            <input type="range" id="gel-syrup-g" min="5" max="120" value="30" step="5" oninput="updateGel()">
+            <span class="slider-val" id="gel-syrup-g-val">30 g</span>
+          </div>
+        </div>
+        <div id="gel-context" style="font-size:12px;color:var(--text-light);margin-bottom:12px;line-height:1.6;"></div>
+        <button class="btn btn-success btn-full" onclick="addGelToCart()">Ajouter le gel au panier</button>
+      </div>
+    </div>
+    <div id="gel-recipe"></div>
+  </div>
+</div>
+
+<!-- ===== TAB: BASE PRODUITS ===== -->
+<div class="tab-content" id="content-products">
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title" id="pform-title">Ajouter un produit</div>
+        <input type="hidden" id="p-edit-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="p-nom" placeholder="Gel, sirop, malto...">
+          </div>
+          <div class="form-group">
+            <label>Marque</label>
+            <input type="text" id="p-marque" placeholder="Maurten, maison...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de dosage</label>
+            <select id="p-type" onchange="onPTypeChange()">
+              <option value="grammes">En grammes</option>
+              <option value="portion">Par portion</option>
+            </select>
+          </div>
+          <div class="form-group" id="p-portion-grp" style="display:none">
+            <label>Taille d'une portion (g)</label>
+            <input type="number" id="p-portion-g" value="30" min="0.1" step="1" oninput="updatePPreview()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Poids total unité/portion (g)</label>
+            <input type="number" id="p-poids" value="30" min="0" step="1">
+          </div>
+          <div class="form-group">
+            <label>Eau (g / 100 g)</label>
+            <input type="number" id="p-eau" value="0" min="0" max="100" step="1">
+          </div>
+        </div>
+        <div class="section-sep">Composition pour 100 g</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>CHO (g/100g)</label>
+            <input type="number" id="p-cho" value="80" min="0" max="100" step="1" oninput="updatePPreview()">
+          </div>
+          <div class="form-group">
+            <label>Glucose (g/100g)</label>
+            <input type="number" id="p-glu" value="50" min="0" max="100" step="1" oninput="updatePPreview()">
+          </div>
+          <div class="form-group">
+            <label>Fructose (g/100g)</label>
+            <input type="number" id="p-fru" value="30" min="0" max="100" step="1" oninput="updatePPreview()">
+          </div>
+        </div>
+        <div id="p-preview" style="font-size:12px;margin-bottom:9px;min-height:18px;"></div>
+        <div class="form-group">
+          <label class="chk-label">
+            <input type="checkbox" id="p-dans-bidon">
+            Se mélange dans les bidons (malto, fructose, sirop...)
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-success" style="flex:1" onclick="saveProduct()">Enregistrer</button>
+          <button class="btn btn-secondary" onclick="resetPForm()">Annuler</button>
+        </div>
+        <hr class="div">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm btn-outline" onclick="exportCSV()">Exporter CSV</button>
+          <label class="btn btn-sm btn-outline" style="cursor:pointer;">
+            Importer CSV
+            <input type="file" accept=".csv" onchange="importCSV(this)" style="display:none">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Catalogue — <span id="prod-count">0</span> produit(s)</div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Type</th>
+                <th>CHO</th>
+                <th>Glu</th>
+                <th>Fru</th>
+                <th>Eau</th>
+                <th>Ratio</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="prod-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================
+// CONSTANTS
+// ============================
+const ELEC = { na: 517, k: 153, ca: 92, mg: 15 };
+const SWEAT_DESC = ['', 'Sudation faible', 'Sudation modérée', 'Sudation moyenne', 'Sudation élevée', 'Sudation très élevée'];
+
+// ============================
+// STATE
+// ============================
+let state = {
+  products: [
+    {
+      id: 'PATE_FRUIT_SS', nom: 'Pâte de fruit', marque: 'Saint Siffrein',
+      type: 'portion', portion_g: 30, poids_total_g: 30,
+      cho_100g: 80, glu_100g: 50, fru_100g: 30, eau_100g: 0, dans_bidon: false,
+      cho_portion: 24, glu_portion: 15, fru_portion: 9
+    },
+    {
+      id: 'ELECTROLYTE_BASE', nom: 'Électrolyte', marque: '',
+      type: 'portion', portion_g: 2, poids_total_g: 2,
+      cho_100g: 0, glu_100g: 0, fru_100g: 0, eau_100g: 0, dans_bidon: true,
+      cho_portion: 0, glu_portion: 0, fru_portion: 0
+    }
+  ],
+  cart: [],
+  bottles: [],
+  gel: { syrupId: null, syrupG: 30 }
+};
+
+let lastGelRecipe = null;
+
+// ============================
+// UTILS
+// ============================
+function getDurH() {
+  const h = parseFloat(document.getElementById('dur-h').value) || 0;
+  const m = parseFloat(document.getElementById('dur-m').value) || 0;
+  return Math.max(0, h + m / 60);
+}
+function getChoH() { return parseFloat(document.getElementById('cho-per-h').value) || 0; }
+function getGluH() { return parseFloat(document.getElementById('glu-per-h').value) || 0; }
+function f(n, d = 1) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toFixed(d);
+}
+function uid() { return 'P' + Date.now() + Math.floor(Math.random() * 9999); }
+
+function cartTotals() {
+  let cho = 0, glu = 0, fru = 0, poids = 0, eau = 0, poudresBidon = 0;
+  state.cart.forEach(i => {
+    cho += i.cho || 0; glu += i.glu || 0; fru += i.fru || 0;
+    poids += i.poids_g || 0; eau += i.eau_ml || 0;
+    if (i.dans_bidon) poudresBidon += i.qty_g_total || 0;
+  });
+  return { cho, glu, fru, poids, eau, poudresBidon };
+}
+
+function ratioData(glu, fru) {
+  if (!glu || glu <= 0 || !fru || fru <= 0) return null;
+  const r = glu / fru;
+  const logR = Math.log2(r);
+  const pct = Math.max(0, Math.min(100, ((logR + 2) / 4) * 100));
+  let status, tagClass;
+  if (r >= 1.0 && r <= 2.0)       { status = 'Zone optimale (1:1 à 2:1)'; tagClass = 'tag-green'; }
+  else if (r > 0.5 && r < 1.0)    { status = 'Trop de fructose'; tagClass = 'tag-orange'; }
+  else if (r > 2.0 && r <= 3.0)   { status = 'Légèrement trop de glucose'; tagClass = 'tag-yellow'; }
+  else if (r > 0 && r <= 0.5)     { status = 'Excès de fructose'; tagClass = 'tag-red'; }
+  else                             { status = 'Excès de glucose'; tagClass = 'tag-red'; }
+  return { r, pct, str: r.toFixed(2) + ':1', status, tagClass };
+}
+
+// ============================
+// TAB NAVIGATION
+// ============================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('content-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'plan') { renderProductSelector(); updateSynthesis(); }
+  else if (tab === 'elec') updateElec();
+  else if (tab === 'gel') { renderGelSyrupSel(); updateGel(); }
+  else if (tab === 'products') renderProdsTable();
+}
+
+// ============================
+// PLAN TAB
+// ============================
+function renderProductSelector() {
+  const sel = document.getElementById('sel-product');
+  const cur = sel.value;
+  sel.innerHTML = state.products.map(p =>
+    `<option value="${p.id}">${p.nom}${p.marque ? ' — ' + p.marque : ''} [${p.type === 'portion' ? 'portion ' + p.portion_g + 'g' : 'g'}]</option>`
+  ).join('');
+  if (cur && state.products.find(p => p.id === cur)) sel.value = cur;
+  onProductSelect();
+}
+
+function onProductSelect() {
+  const pid = document.getElementById('sel-product').value;
+  const p = state.products.find(x => x.id === pid);
+  const c = document.getElementById('qty-ctrl');
+  if (!p) { c.innerHTML = ''; return; }
+  if (p.type === 'grammes') {
+    c.innerHTML = `<div class="form-group"><label>Quantité (g)</label>
+      <div class="slider-group">
+        <input type="range" id="qty-sl" min="5" max="500" step="5" value="50"
+          oninput="this.nextElementSibling.value=this.value">
+        <input type="number" id="qty-num" value="50" min="5" max="500" step="5" style="width:64px"
+          oninput="document.getElementById('qty-sl').value=this.value">
+        <span style="font-size:11px;color:var(--text-light)">g</span>
+      </div></div>`;
+  } else {
+    c.innerHTML = `<div class="form-group"><label>Nombre de portions (${p.portion_g} g/portion)</label>
+      <div class="slider-group">
+        <input type="range" id="qty-sl" min="1" max="20" step="1" value="1"
+          oninput="this.nextElementSibling.value=this.value">
+        <input type="number" id="qty-num" value="1" min="1" max="20" step="1" style="width:58px"
+          oninput="document.getElementById('qty-sl').value=this.value">
+        <span style="font-size:11px;color:var(--text-light)">port.</span>
+      </div></div>`;
+  }
+}
+
+function addToCart() {
+  const pid = document.getElementById('sel-product').value;
+  const p = state.products.find(x => x.id === pid);
+  if (!p) return;
+  const qtyEl = document.getElementById('qty-num');
+  if (!qtyEl) return;
+  const qty = parseFloat(qtyEl.value) || 0;
+  if (qty <= 0) return;
+
+  let cho, glu, fru, qty_g_total, poids_g, eau_ml;
+  if (p.type === 'grammes') {
+    cho = p.cho_100g * qty / 100;
+    glu = p.glu_100g * qty / 100;
+    fru = p.fru_100g * qty / 100;
+    qty_g_total = qty; poids_g = qty;
+  } else {
+    const n = Math.round(qty);
+    cho = (p.cho_portion || 0) * n;
+    glu = (p.glu_portion || 0) * n;
+    fru = (p.fru_portion || 0) * n;
+    qty_g_total = p.portion_g * n;
+    poids_g = (p.poids_total_g || p.portion_g) * n;
+  }
+  eau_ml = (p.eau_100g || 0) * qty_g_total / 100;
+
+  const ex = state.cart.find(i => i.id === pid);
+  if (ex) {
+    ex.qty += (p.type === 'grammes' ? qty : Math.round(qty));
+    ex.cho += cho; ex.glu += glu; ex.fru += fru;
+    ex.qty_g_total += qty_g_total; ex.poids_g += poids_g; ex.eau_ml += eau_ml;
+  } else {
+    state.cart.push({ id: pid, nom: p.nom, marque: p.marque, type: p.type,
+      portion_g: p.portion_g, poids_total_g: p.poids_total_g, dans_bidon: p.dans_bidon,
+      qty: p.type === 'grammes' ? qty : Math.round(qty),
+      qty_g_total, cho, glu, fru, poids_g, eau_ml });
+  }
+  renderCart(); updateSynthesis();
+}
+
+function removeFromCart(id) {
+  state.cart = state.cart.filter(i => i.id !== id);
+  renderCart(); updateSynthesis();
+}
+
+function clearCart() {
+  state.cart = [];
+  renderCart(); updateSynthesis();
+}
+
+function updateCartItemQty(id, val) {
+  if (isNaN(val) || val === null) return;
+  if (val <= 0) { removeFromCart(id); return; }
+  const item = state.cart.find(i => i.id === id);
+  if (!item) return;
+  const p = state.products.find(x => x.id === id);
+  if (!p && item.id !== 'GEL_MAISON') return;
+  if (item.id === 'GEL_MAISON') { item.qty = val; return; }
+
+  if (p.type === 'grammes') {
+    item.qty = val; item.qty_g_total = val;
+    item.cho = p.cho_100g * val / 100;
+    item.glu = p.glu_100g * val / 100;
+    item.fru = p.fru_100g * val / 100;
+    item.poids_g = val;
+    item.eau_ml = (p.eau_100g || 0) * val / 100;
+  } else {
+    const n = Math.round(val); item.qty = n;
+    item.qty_g_total = p.portion_g * n;
+    item.cho = (p.cho_portion || 0) * n;
+    item.glu = (p.glu_portion || 0) * n;
+    item.fru = (p.fru_portion || 0) * n;
+    item.poids_g = (p.poids_total_g || p.portion_g) * n;
+    item.eau_ml = (p.eau_100g || 0) * item.qty_g_total / 100;
+  }
+}
+
+function syncQty(id, val) {
+  updateCartItemQty(id, parseFloat(val));
+  // Update just the macros cell for this item
+  const row = document.querySelector(`.cart-item[data-id="${CSS.escape(id)}"]`);
+  if (row) {
+    const item = state.cart.find(i => i.id === id);
+    if (item) {
+      const m = row.querySelector('.cart-macros');
+      if (m) m.innerHTML = `<div class="cho">${f(item.cho, 0)} g CHO</div><div>${f(item.glu, 0)} G · ${f(item.fru, 0)} F</div>`;
+    }
+  }
+  updateSynthesis();
+}
+
+function renderCart() {
+  const c = document.getElementById('cart-list');
+  if (state.cart.length === 0) { c.innerHTML = '<div class="empty-state">Panier vide</div>'; return; }
+  c.innerHTML = state.cart.map(item => {
+    if (item.id === 'GEL_MAISON') {
+      return `<div class="cart-item">
+        <div class="cart-name"><strong>Gel maison</strong><small>recette calculée</small></div>
+        <div class="cart-macros">
+          <div class="cho">${f(item.cho, 0)} g CHO</div>
+          <div>${f(item.glu, 0)} G · ${f(item.fru, 0)} F</div>
+        </div>
+        <button class="btn btn-xs btn-danger" onclick="removeFromCart('GEL_MAISON')">×</button>
+      </div>`;
+    }
+    const unit = item.type === 'portion' ? 'port.' : 'g';
+    const mx = item.type === 'grammes' ? 500 : 20;
+    const mn = item.type === 'grammes' ? 5 : 1;
+    const st = item.type === 'grammes' ? 5 : 1;
+    return `<div class="cart-item" data-id="${item.id}">
+      <div class="cart-name">
+        <strong>${item.nom}</strong>
+        <small>${item.marque ? item.marque + ' · ' : ''}${f(item.qty_g_total, 0)} g aliment</small>
+      </div>
+      <div class="cart-qty">
+        <input type="range" min="${mn}" max="${mx}" step="${st}" value="${item.qty}"
+          oninput="this.nextElementSibling.value=parseFloat(this.value);syncQty('${item.id}',this.value)">
+        <input type="number" value="${item.qty}" min="${mn}" max="${mx}" step="${st}"
+          oninput="document.querySelector('.cart-item[data-id=\\'${item.id}\\'] input[type=range]').value=this.value;syncQty('${item.id}',this.value)">
+        <span>${unit}</span>
+      </div>
+      <div class="cart-macros">
+        <div class="cho">${f(item.cho, 0)} g CHO</div>
+        <div>${f(item.glu, 0)} G · ${f(item.fru, 0)} F</div>
+      </div>
+      <button class="btn btn-xs btn-danger" onclick="removeFromCart('${item.id}')">×</button>
+    </div>`;
+  }).join('');
+}
+
+function addBottle(ml) {
+  state.bottles.push(ml);
+  renderBottles(); updateSynthesis();
+}
+function removeBottle(i) {
+  state.bottles.splice(i, 1);
+  renderBottles(); updateSynthesis();
+}
+function renderBottles() {
+  const c = document.getElementById('bottles-list');
+  if (!state.bottles.length) { c.innerHTML = ''; return; }
+  c.innerHTML = state.bottles.map((ml, i) =>
+    `<span class="bottle-chip" onclick="removeBottle(${i})">${ml} ml <span class="x">×</span></span>`
+  ).join('');
+}
+
+function updateSynthesis() {
+  const c = document.getElementById('synthesis');
+  const dh = getDurH();
+  const choH = getChoH();
+  const gluH = getGluH();
+  const tot = cartTotals();
+
+  if (dh <= 0) {
+    c.innerHTML = `<div class="alert alert-info"><span class="alert-icon">ℹ</span>Renseigne une durée > 0 pour afficher les indicateurs.</div>`;
+    return;
+  }
+
+  const choRateH = tot.cho / dh;
+  const gluRateH = tot.glu / dh;
+  const fruRateH = tot.fru / dh;
+  const choTarget = choH * dh;
+
+  // Hydration
+  const bottleTotal = state.bottles.reduce((a, b) => a + b, 0);
+  const reductionBidon = tot.poudresBidon * 0.6;
+  const bottleNet = Math.max(0, bottleTotal - reductionBidon);
+  const eauTotale = bottleNet + tot.eau;
+  const besoin = 500 * dh;
+  const coveragePct = besoin > 0 ? (eauTotale / besoin * 100) : 0;
+
+  const rd = ratioData(tot.glu, tot.fru);
+
+  // Gauge position
+  let gaugeHtml = '';
+  if (rd) {
+    gaugeHtml = `
+      <div class="ratio-label">${rd.str} <span style="font-size:13px;font-weight:400;color:var(--text-light)">(glu:fru)</span></div>
+      <div class="ratio-status-line"><span class="tag ${rd.tagClass}">${rd.status}</span></div>
+      <div class="ratio-bar-wrap">
+        <div class="ratio-bar"></div>
+        <div class="ratio-marker" style="left:${rd.pct}%"></div>
+      </div>
+      <div class="ratio-ticks">
+        <span>1:4</span><span>1:2</span><span>1:1</span><span>2:1</span><span>4:1</span>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text-light);margin-top:6px;">Zone verte : glu:fru entre 1:1 et 2:1</div>`;
+  } else {
+    gaugeHtml = `<div class="empty-state" style="padding:8px 0;">Pas encore de données glucose et fructose dans le panier.</div>`;
+  }
+
+  // Alerts
+  let alerts = '';
+  if (gluRateH > 60) {
+    alerts += `<div class="alert alert-warning"><span class="alert-icon">⚠</span>
+      <div><strong>${f(gluRateH, 1)} g/h de glucose</strong> — Les transporteurs intestinaux (SGLT1) saturent autour de 60 g/h. Vérifier le ratio glu:fru pour optimiser l'absorption totale.</div>
+    </div>`;
+  }
+  if (tot.cho > 0 && Math.abs(tot.cho - choTarget) < 1) {
+    alerts += `<div class="alert alert-success"><span class="alert-icon">✓</span>Objectif CHO atteint.</div>`;
+  }
+
+  // CHO progress
+  const choFillPct = choTarget > 0 ? Math.min(100, (tot.cho / choTarget) * 100) : 0;
+  const choFillColor = choFillPct >= 95 ? 'var(--vert)' : choFillPct >= 70 ? 'var(--beige)' : 'var(--bleu)';
+
+  c.innerHTML = `
+    ${alerts}
+
+    <div class="card">
+      <div class="card-title">Glucides</div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;">
+          <span>CHO total : <strong>${f(tot.cho, 0)} g</strong></span>
+          <span class="muted">Objectif : ${f(choTarget, 0)} g</span>
+        </div>
+        <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border)">
+          <div style="height:100%;width:${choFillPct}%;background:${choFillColor};border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">CHO / h</div>
+          <div class="metric-value">${f(choRateH, 1)} <span class="metric-unit">g/h</span></div>
+        </div>
+        <div class="metric" style="${gluRateH > 60 ? 'border:1.5px solid var(--orange)' : ''}">
+          <div class="metric-label">Glucose / h</div>
+          <div class="metric-value" style="color:${gluRateH > 60 ? 'var(--orange)' : 'inherit'}">${f(gluRateH, 1)} <span class="metric-unit">g/h</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Fructose / h</div>
+          <div class="metric-value">${f(fruRateH, 1)} <span class="metric-unit">g/h</span></div>
+        </div>
+      </div>
+      <div class="metrics-grid" style="margin-bottom:0">
+        <div class="metric">
+          <div class="metric-label">Glucose total</div>
+          <div class="metric-value" style="font-size:14px;">${f(tot.glu, 0)} <span class="metric-unit">g</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Fructose total</div>
+          <div class="metric-value" style="font-size:14px;">${f(tot.fru, 0)} <span class="metric-unit">g</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ratio Glucose : Fructose</div>
+      <div class="ratio-wrapper">${gaugeHtml}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Poids</div>
+      <div class="metrics-grid" style="margin-bottom:0">
+        <div class="metric">
+          <div class="metric-label">Poids produits</div>
+          <div class="metric-value">${f(tot.poids, 0)} <span class="metric-unit">g</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Poids CHO seuls</div>
+          <div class="metric-value">${f(tot.cho, 0)} <span class="metric-unit">g</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Poids total + eau bidons</div>
+          <div class="metric-value" style="font-size:14px;">${f(tot.poids + bottleTotal, 0)} <span class="metric-unit">g</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Hydratation</div>
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Eau des produits</div>
+          <div class="metric-value">${f(tot.eau, 0)} <span class="metric-unit">ml</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Bidons (brut)</div>
+          <div class="metric-value">${bottleTotal} <span class="metric-unit">ml</span></div>
+        </div>
+        ${reductionBidon > 0 ? `<div class="metric">
+          <div class="metric-label">Réduction poudres</div>
+          <div class="metric-value" style="color:var(--rouge);">−${f(reductionBidon, 0)} <span class="metric-unit">ml</span></div>
+        </div>` : ''}
+        <div class="metric highlight">
+          <div class="metric-label">Eau totale disponible</div>
+          <div class="metric-value" style="color:var(--bleu);">${f(eauTotale, 0)} <span class="metric-unit">ml</span></div>
+        </div>
+      </div>
+      <div style="margin-top:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;">
+          <span>Couverture vs besoin estimé (500 ml/h)</span>
+          <span class="muted">${f(besoin, 0)} ml</span>
+        </div>
+        <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;border:1px solid var(--border)">
+          <div style="height:100%;width:${Math.min(100, coveragePct)}%;background:${coveragePct >= 90 ? 'var(--vert)' : coveragePct >= 60 ? 'var(--beige)' : 'var(--rouge)'};border-radius:3px;transition:width .4s"></div>
+        </div>
+        <div style="text-align:right;font-size:11px;color:var(--text-light);margin-top:3px;">${f(coveragePct, 0)} %</div>
+      </div>
+    </div>`;
+}
+
+// ============================
+// ÉLECTROLYTES TAB
+// ============================
+function updateElec() {
+  const tempEl = document.getElementById('elec-temp');
+  const sweatEl = document.getElementById('elec-sweat');
+  const heatEl = document.getElementById('elec-heat');
+  if (!tempEl) return;
+
+  const temp = parseFloat(tempEl.value) || 18;
+  const sweat = parseInt(sweatEl.value) || 2;
+  const heat = heatEl.checked;
+
+  document.getElementById('elec-temp-val').textContent = temp + ' °C';
+  document.getElementById('elec-sweat-val').textContent = sweat + ' / 5';
+  document.getElementById('elec-sweat-desc').textContent = SWEAT_DESC[sweat] || '';
+
+  const dh = getDurH();
+  document.getElementById('elec-dur-display').textContent = dh > 0 ? f(dh, 1) + ' h' : '—';
+
+  // Base calculation
+  let perH = 1.0;
+  if (temp > 25) perH += 0.5;
+  if (temp > 32) perH += 0.25;
+  if (heat) perH += 0.25;
+  if (sweat >= 4) perH += 0.5;
+  if (sweat >= 5) perH += 0.25;
+  if (sweat <= 1) perH -= 0.25;
+  perH = Math.max(0.5, Math.min(4.0, perH));
+
+  const before = 1.0;
+  const after = (sweat >= 4 || dh >= 3) ? 2.0 : 1.0;
+  const during = dh > 0 ? perH * dh : null;
+  const total = during !== null ? before + during + after : null;
+
+  // Cart check
+  const cartElec = state.cart.find(i => i.id === 'ELECTROLYTE_BASE');
+  const cartServings = cartElec ? cartElec.qty : 0;
+
+  const e = ELEC;
+  const tNa = total !== null ? total * e.na : null;
+  const tK  = total !== null ? total * e.k  : null;
+  const tCa = total !== null ? total * e.ca : null;
+  const tMg = total !== null ? total * e.mg : null;
+
+  let notes = [];
+  if (temp > 25) notes.push('Température élevée — dose augmentée.');
+  if (heat) notes.push('Heat training actif — dose augmentée.');
+  if (sweat >= 4) notes.push('Sudation forte — dose augmentée.');
+  if (cartServings > 0 && total !== null) {
+    const diff = total - cartServings;
+    if (Math.abs(diff) < 0.5) notes.push(`Le panier couvre approximativement le besoin (${cartServings} serving(s)).`);
+    else if (diff > 0) notes.push(`Le panier contient ${cartServings} serving(s) — il en manque ${f(diff, 1)}.`);
+    else notes.push(`Le panier contient ${cartServings} serving(s), soit ${f(-diff, 1)} de plus que le besoin estimé.`);
+  }
+
+  const durStr = dh > 0 ? `${f(perH, 2)} /h · ${f(dh, 1)} h` : f(perH, 2) + ' /h';
+
+  document.getElementById('elec-reco').innerHTML = `
+    <div class="card">
+      <div class="card-title">Recommandations électrolytes</div>
+      <div class="elec-reco">
+        <div class="elec-card">
+          <div class="elec-card-label">Avant la sortie</div>
+          <div class="elec-card-val">${f(before, 0)}</div>
+          <div class="elec-card-unit">serving(s)</div>
+        </div>
+        <div class="elec-card">
+          <div class="elec-card-label">Pendant (${durStr})</div>
+          <div class="elec-card-val">${during !== null ? f(during, 1) : '—'}</div>
+          <div class="elec-card-unit">serving(s)</div>
+        </div>
+        <div class="elec-card">
+          <div class="elec-card-label">Après la sortie</div>
+          <div class="elec-card-val">${f(after, 0)}</div>
+          <div class="elec-card-unit">serving(s)</div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric" style="border:1.5px solid var(--marron)">
+          <div class="metric-label">Total sortie</div>
+          <div class="metric-value" style="color:var(--marron)">${total !== null ? f(total, 1) : '—'}</div>
+          <div class="metric-unit">servings</div>
+        </div>
+        <div class="metric" style="border:1.5px solid ${cartServings > 0 ? 'var(--vert)' : 'var(--border)'}">
+          <div class="metric-label">Dans le panier</div>
+          <div class="metric-value" style="color:${cartServings > 0 ? 'var(--vert)' : 'var(--text-light)'}">${cartServings}</div>
+          <div class="metric-unit">servings</div>
+        </div>
+      </div>
+
+      <div class="section-sep" style="margin-top:4px">Apports minéraux totaux (toute la sortie)</div>
+      <div class="metrics-grid" style="margin-bottom:0">
+        <div class="metric">
+          <div class="metric-label">Sodium</div>
+          <div class="metric-value" style="font-size:14px">${tNa !== null ? f(tNa, 0) : '—'} <span class="metric-unit">mg</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Potassium</div>
+          <div class="metric-value" style="font-size:14px">${tK !== null ? f(tK, 0) : '—'} <span class="metric-unit">mg</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Calcium</div>
+          <div class="metric-value" style="font-size:14px">${tCa !== null ? f(tCa, 0) : '—'} <span class="metric-unit">mg</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Magnésium</div>
+          <div class="metric-value" style="font-size:14px">${tMg !== null ? f(tMg, 0) : '—'} <span class="metric-unit">mg</span></div>
+        </div>
+      </div>
+
+      ${notes.length > 0 ? `<div style="margin-top:11px;font-size:12px;color:var(--text-light);line-height:1.9;border-top:1px solid var(--border);padding-top:10px;">${notes.map(n => '· ' + n).join('<br>')}</div>` : ''}
+    </div>`;
+}
+
+// ============================
+// GEL MAISON TAB
+// ============================
+function renderGelSyrupSel() {
+  const sel = document.getElementById('gel-syrup');
+  const syrups = state.products.filter(p =>
+    p.nom.toLowerCase().includes('sirop') || (p.marque || '').toLowerCase().includes('sirop')
+  );
+  if (!syrups.length) {
+    sel.innerHTML = '<option value="">Aucun sirop dans le catalogue</option>';
+    state.gel.syrupId = null;
+  } else {
+    sel.innerHTML = syrups.map(p =>
+      `<option value="${p.id}" ${p.id === state.gel.syrupId ? 'selected' : ''}>${p.nom}${p.marque ? ' — ' + p.marque : ''}</option>`
+    ).join('');
+    if (!state.gel.syrupId || !syrups.find(p => p.id === state.gel.syrupId)) {
+      state.gel.syrupId = syrups[0].id;
+      sel.value = state.gel.syrupId;
+    }
+  }
+}
+
+function computeGel() {
+  const dh = getDurH();
+  const choPerH = getChoH();
+  const gluPerH = getGluH();
+  if (dh <= 0 || choPerH <= 0) return null;
+
+  const tot = cartTotals();
+  const choH = tot.cho / dh;
+  const gluH = tot.glu / dh;
+
+  const syrupId = document.getElementById('gel-syrup').value;
+  const syrupG = parseFloat(document.getElementById('gel-syrup-g').value) || 30;
+  const syrup = state.products.find(p => p.id === syrupId);
+
+  const K = 1 / 0.90;
+  const cho_need = Math.max(0, choPerH - choH);
+  const glu_need_raw = Math.max(0, gluPerH - gluH);
+  const glu_target = Math.min(glu_need_raw, cho_need);
+  const fru_target = Math.max(0, cho_need - glu_target);
+
+  const s_cho = syrup ? (syrup.cho_100g || 0) * syrupG / 100 : 0;
+  const s_glu = syrup ? (syrup.glu_100g || 0) * syrupG / 100 : 0;
+  const s_fru = syrup ? (syrup.fru_100g || 0) * syrupG / 100 : 0;
+
+  const rem_cho = Math.max(0, cho_need - s_cho);
+  const rem_glu = Math.max(0, glu_target - s_glu);
+  const malto = Math.min(rem_glu, rem_cho);
+  const fru_powder = Math.max(0, rem_cho - malto);
+
+  const gel_cho = s_cho + malto + fru_powder;
+  const gel_glu = s_glu + malto;
+  const gel_fru = s_fru + fru_powder;
+
+  const scale = (67.0 > 0) ? (gel_cho * K / 67.0) : 1;
+  const water_ml = 33 * scale;
+  const agar_g = 0.30 * scale;
+  const salt_g = 0.50 * scale;
+
+  const vol_c = water_ml / K + syrupG + 0.6 * (malto + fru_powder + agar_g + salt_g);
+  const vol_l = water_ml + syrupG * K + 0.6 * (malto * K + fru_powder * K + agar_g + salt_g);
+
+  const warns = [];
+  if (cho_need <= 0) warns.push('Objectif CHO déjà couvert par le panier.');
+  if (glu_need_raw > cho_need && cho_need > 0) warns.push('Objectif glucose non atteignable sans dépasser le CHO.');
+  if (!syrup || s_cho + s_glu + s_fru === 0) warns.push('Sirop absent ou valeurs nulles — ajoute un sirop au catalogue.');
+
+  return {
+    c: { syrup: syrupG, malto, fru: fru_powder, water: water_ml, agar: agar_g, salt: salt_g, cho: gel_cho, glu: gel_glu, fru2: gel_fru, vol: vol_c },
+    l: { syrup: syrupG * K, malto: malto * K, fru: fru_powder * K, water: water_ml, agar: agar_g, salt: salt_g, cho: gel_cho * K, glu: gel_glu * K, fru2: gel_fru * K, vol: vol_l },
+    need: cho_need, context: { choH, gluH, choPerH, gluPerH }, warns
+  };
+}
+
+function updateGel() {
+  const sgEl = document.getElementById('gel-syrup-g');
+  if (!sgEl) return;
+  document.getElementById('gel-syrup-g-val').textContent = sgEl.value + ' g';
+  state.gel.syrupG = parseFloat(sgEl.value) || 30;
+
+  const recipe = computeGel();
+  lastGelRecipe = recipe;
+
+  const dh = getDurH();
+  let ctx = '';
+  if (dh <= 0) ctx = 'Renseigne la durée dans l\'onglet Plan.';
+  else if (recipe) {
+    ctx = `Panier actuel : <strong>${f(recipe.context.choH, 1)} g CHO/h</strong> · <strong>${f(recipe.context.gluH, 1)} g glucose/h</strong><br>CHO manquant à couvrir : <strong>${f(recipe.need, 1)} g/h</strong>`;
+  }
+  document.getElementById('gel-context').innerHTML = ctx;
+
+  const panel = document.getElementById('gel-recipe');
+  if (!recipe || recipe.need <= 0) {
+    panel.innerHTML = `<div class="card">
+      <div class="card-title">Recette gel maison</div>
+      ${recipe && recipe.need <= 0
+        ? '<div class="alert alert-success"><span class="alert-icon">✓</span>Objectif CHO déjà couvert — aucun gel nécessaire.</div>'
+        : '<div class="empty-state">Renseigne la durée et les objectifs dans l\'onglet Plan.</div>'}
+    </div>`;
+    return;
+  }
+
+  const warnHtml = recipe.warns.map(w =>
+    `<div class="alert alert-warning"><span class="alert-icon">⚠</span>${w}</div>`
+  ).join('');
+
+  const recipeRow = (label, valC, valL, unit) =>
+    `<tr><td>${label}</td><td>${f(valC, 1)} ${unit}</td><td>${f(valL, 1)} ${unit}</td></tr>`;
+
+  panel.innerHTML = `<div class="card">
+    <div class="card-title">Recette gel maison</div>
+    ${warnHtml}
+    <table style="font-size:12.5px;margin-bottom:12px">
+      <thead>
+        <tr>
+          <th style="padding:5px 8px 5px 0;"></th>
+          <th style="padding:5px 8px">Consommée (1h)</th>
+          <th style="padding:5px 8px">Chargée (flasque)</th>
+        </tr>
+      </thead>
+      <tbody class="recipe-table">
+        ${recipeRow('Sirop', recipe.c.syrup, recipe.l.syrup, 'g')}
+        ${recipeRow('Maltodextrine', recipe.c.malto, recipe.l.malto, 'g')}
+        ${recipeRow('Fructose poudre', recipe.c.fru, recipe.l.fru, 'g')}
+        ${recipeRow('Eau', recipe.c.water, recipe.l.water, 'ml')}
+        ${recipeRow('Agar-agar', recipe.c.agar, recipe.l.agar, 'g')}
+        ${recipeRow('Sel', recipe.c.salt, recipe.l.salt, 'g')}
+        <tr class="total">
+          <td>Volume ~</td>
+          <td><strong>${f(recipe.c.vol, 0)} ml</strong></td>
+          <td><strong>${f(recipe.l.vol, 0)} ml</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-sep">Apports glucidiques</div>
+    <div class="metrics-grid" style="margin-bottom:0">
+      <div class="metric">
+        <div class="metric-label">CHO consommé</div>
+        <div class="metric-value" style="font-size:14px;color:var(--marron)">${f(recipe.c.cho, 1)} <span class="metric-unit">g</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Glucose</div>
+        <div class="metric-value" style="font-size:14px">${f(recipe.c.glu, 1)} <span class="metric-unit">g</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Fructose</div>
+        <div class="metric-value" style="font-size:14px">${f(recipe.c.fru2, 1)} <span class="metric-unit">g</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addGelToCart() {
+  if (!lastGelRecipe || lastGelRecipe.need <= 0) return;
+  const c = lastGelRecipe.c;
+  state.cart = state.cart.filter(i => i.id !== 'GEL_MAISON');
+  state.cart.push({
+    id: 'GEL_MAISON', nom: 'Gel maison', marque: 'recette calculée',
+    type: 'gel', qty: 1, qty_g_total: c.vol, poids_g: c.vol,
+    cho: c.cho, glu: c.glu, fru: c.fru2,
+    eau_ml: c.water, dans_bidon: false
+  });
+  renderCart(); updateSynthesis();
+  switchTab('plan');
+}
+
+// ============================
+// BASE PRODUITS TAB
+// ============================
+function onPTypeChange() {
+  const t = document.getElementById('p-type').value;
+  document.getElementById('p-portion-grp').style.display = t === 'portion' ? 'block' : 'none';
+  updatePPreview();
+}
+
+function updatePPreview() {
+  const cho = parseFloat(document.getElementById('p-cho').value) || 0;
+  const glu = parseFloat(document.getElementById('p-glu').value) || 0;
+  const fru = parseFloat(document.getElementById('p-fru').value) || 0;
+  const diff = Math.abs(glu + fru - cho);
+  const el = document.getElementById('p-preview');
+  if (diff > 0.5) {
+    el.innerHTML = `<span style="color:var(--rouge)">Incohérence : glu + fru = ${(glu+fru).toFixed(1)} g ≠ CHO ${cho.toFixed(1)} g</span>`;
+  } else if (cho > 0) {
+    const r = fru > 0 ? (glu / fru).toFixed(2) + ':1' : 'pur glucose';
+    el.innerHTML = `<span style="color:var(--vert)">Ratio glu:fru = ${r}</span>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function resetPForm() {
+  document.getElementById('p-edit-id').value = '';
+  document.getElementById('p-nom').value = '';
+  document.getElementById('p-marque').value = '';
+  document.getElementById('p-type').value = 'grammes';
+  document.getElementById('p-portion-g').value = '30';
+  document.getElementById('p-poids').value = '30';
+  document.getElementById('p-cho').value = '80';
+  document.getElementById('p-glu').value = '50';
+  document.getElementById('p-fru').value = '30';
+  document.getElementById('p-eau').value = '0';
+  document.getElementById('p-dans-bidon').checked = false;
+  document.getElementById('p-portion-grp').style.display = 'none';
+  document.getElementById('pform-title').textContent = 'Ajouter un produit';
+  document.getElementById('p-preview').innerHTML = '';
+}
+
+function editProduct(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('p-edit-id').value = p.id;
+  document.getElementById('p-nom').value = p.nom;
+  document.getElementById('p-marque').value = p.marque || '';
+  document.getElementById('p-type').value = p.type;
+  document.getElementById('p-portion-g').value = p.portion_g || 30;
+  document.getElementById('p-poids').value = p.poids_total_g || p.portion_g || 30;
+  document.getElementById('p-cho').value = p.cho_100g;
+  document.getElementById('p-glu').value = p.glu_100g;
+  document.getElementById('p-fru').value = p.fru_100g;
+  document.getElementById('p-eau').value = p.eau_100g || 0;
+  document.getElementById('p-dans-bidon').checked = !!p.dans_bidon;
+  document.getElementById('p-portion-grp').style.display = p.type === 'portion' ? 'block' : 'none';
+  document.getElementById('pform-title').textContent = 'Modifier — ' + p.nom;
+  updatePPreview();
+  document.getElementById('content-products').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteProduct(id) {
+  if (!confirm('Supprimer ce produit du catalogue ?')) return;
+  state.products = state.products.filter(p => p.id !== id);
+  state.cart = state.cart.filter(i => i.id !== id);
+  renderProdsTable(); renderProductSelector(); renderGelSyrupSel();
+  renderCart(); updateSynthesis();
+}
+
+function saveProduct() {
+  const nom = document.getElementById('p-nom').value.trim();
+  const marque = document.getElementById('p-marque').value.trim();
+  const type = document.getElementById('p-type').value;
+  const cho = parseFloat(document.getElementById('p-cho').value) || 0;
+  const glu = parseFloat(document.getElementById('p-glu').value) || 0;
+  const fru = parseFloat(document.getElementById('p-fru').value) || 0;
+  const eau = parseFloat(document.getElementById('p-eau').value) || 0;
+  const poids = parseFloat(document.getElementById('p-poids').value) || 30;
+  const dans_bidon = document.getElementById('p-dans-bidon').checked;
+  const editId = document.getElementById('p-edit-id').value;
+
+  if (!nom) { alert('Le nom est obligatoire.'); return; }
+  if (Math.abs(glu + fru - cho) > 0.5 && (cho > 0 || glu > 0 || fru > 0)) {
+    if (!confirm(`Incohérence : glu(${glu}) + fru(${fru}) = ${glu+fru} ≠ CHO(${cho}). Enregistrer quand même ?`)) return;
+  }
+
+  let portion_g = 0, cho_p = 0, glu_p = 0, fru_p = 0;
+  if (type === 'portion') {
+    portion_g = parseFloat(document.getElementById('p-portion-g').value) || 30;
+    cho_p = cho * portion_g / 100;
+    glu_p = glu * portion_g / 100;
+    fru_p = fru * portion_g / 100;
+  }
+
+  const prod = {
+    id: editId || uid(), nom, marque, type,
+    portion_g, poids_total_g: poids,
+    cho_100g: cho, glu_100g: glu, fru_100g: fru, eau_100g: eau,
+    dans_bidon,
+    cho_portion: cho_p, glu_portion: glu_p, fru_portion: fru_p
+  };
+
+  if (editId) {
+    const idx = state.products.findIndex(p => p.id === editId);
+    if (idx >= 0) state.products[idx] = prod; else state.products.push(prod);
+  } else {
+    state.products.push(prod);
+  }
+
+  resetPForm();
+  renderProdsTable(); renderProductSelector(); renderGelSyrupSel();
+
+  // Flash feedback
+  const btn = document.querySelector('#content-products .btn-success');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = 'Enregistré !';
+    btn.style.background = '#5a9e2e';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1600);
+  }
+}
+
+function renderProdsTable() {
+  const tbody = document.getElementById('prod-tbody');
+  document.getElementById('prod-count').textContent = state.products.length;
+  if (!state.products.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Aucun produit</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.products.map(p => {
+    const choStr = p.type === 'portion'
+      ? `${f(p.cho_portion, 0)} g/port`
+      : `${f(p.cho_100g, 0)} g/100g`;
+    const rStr = (p.glu_100g > 0 && p.fru_100g > 0)
+      ? (p.glu_100g / p.fru_100g).toFixed(1) + ':1'
+      : p.glu_100g > 0 ? 'pur glu' : '—';
+    return `<tr>
+      <td><strong style="font-size:13px">${p.nom}</strong><br><span class="muted" style="font-size:11px">${p.marque || '—'}${p.dans_bidon ? ' · bidon' : ''}</span></td>
+      <td><span class="tag ${p.type === 'portion' ? 'tag-blue' : 'tag-green'}">${p.type}</span></td>
+      <td class="mono">${f(p.cho_100g, 0)}</td>
+      <td class="mono">${f(p.glu_100g, 0)}</td>
+      <td class="mono">${f(p.fru_100g, 0)}</td>
+      <td class="mono">${f(p.eau_100g, 0)}</td>
+      <td class="mono">${rStr}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-xs btn-outline" onclick="editProduct('${p.id}')" style="margin-right:4px">Modifier</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteProduct('${p.id}')">Suppr.</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================
+// CSV IMPORT / EXPORT
+// ============================
+function exportCSV() {
+  const cols = ['id','nom','marque','type','portion_g','poids_total_g','cho_100g','glu_100g','fru_100g','eau_100g','dans_bidon','cho_portion','glu_portion','fru_portion'];
+  const rows = state.products.map(p =>
+    cols.map(c => {
+      const v = p[c] !== undefined ? p[c] : '';
+      return typeof v === 'string' && v.includes(',') ? `"${v}"` : v;
+    }).join(',')
+  );
+  const csv = [cols.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'produits_nutrition_velo.csv';
+  a.click();
+}
+
+function importCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    if (lines.length < 2) { alert('CSV vide ou invalide.'); return; }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const required = ['nom','cho_100g','glu_100g','fru_100g'];
+    const missing = required.filter(r => !headers.includes(r));
+    if (missing.length) { alert('Colonnes manquantes : ' + missing.join(', ')); return; }
+    const numCols = ['portion_g','poids_total_g','cho_100g','glu_100g','fru_100g','eau_100g','cho_portion','glu_portion','fru_portion'];
+    const prods = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      if (vals.length < 3) continue;
+      const p = {};
+      headers.forEach((h, idx) => {
+        const v = vals[idx] || '';
+        if (numCols.includes(h)) p[h] = parseFloat(v) || 0;
+        else if (h === 'dans_bidon') p[h] = v === 'true' || v === '1';
+        else p[h] = v;
+      });
+      if (!p.nom) continue;
+      if (!p.id) p.id = uid();
+      if (!p.type) p.type = 'grammes';
+      prods.push(p);
+    }
+    if (!prods.length) { alert('Aucun produit valide dans le CSV.'); return; }
+    if (confirm(`Importer ${prods.length} produit(s) ? Le catalogue actuel sera remplacé.`)) {
+      state.products = prods;
+      renderProdsTable(); renderProductSelector(); renderGelSyrupSel();
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ============================
+// INIT
+// ============================
+renderProductSelector();
+renderCart();
+renderBottles();
+updateSynthesis();
+renderProdsTable();
+</script>
+</body>
+</html>
